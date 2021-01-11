@@ -4,11 +4,11 @@ import { existsSync, readFileSync } from "fs";
 import { TextDocumentUtils } from "../util/document";
 import { QuoteType, QuoteCharMap } from "../util/types";
 import { sync } from "glob";
-import { output } from "../constant";
+import { logger } from "../constant";
 
 export default class DvaModelProvider implements vscode.DefinitionProvider {
   provideDefinition(document: vscode.TextDocument, position: vscode.Position) {
-    output.appendLine("Dva Model Provider");
+    logger.info("Dva Model Provider");
     const documentUtil = new TextDocumentUtils(document);
     let range = documentUtil.getQuoteRange(position, QuoteType.single);
     let split = QuoteCharMap[QuoteType.single];

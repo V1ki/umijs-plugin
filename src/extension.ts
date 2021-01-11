@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { SUPPORT_LANGUAGE } from './constant';
 import { get } from 'superagent';
 import { ModelProvider } from './definitionProvider';
-import {RouteProvider, DvaModelProvider} from './Provider'
+import {RouteProvider, DvaModelProvider, RouteComponentCompletionItemProvider} from './Provider'
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -15,6 +15,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compJumper);
   const dvaJumper = vscode.languages.registerDefinitionProvider(SUPPORT_LANGUAGE, new DvaModelProvider());
   context.subscriptions.push(dvaJumper);
+
+  vscode.languages.registerCompletionItemProvider(SUPPORT_LANGUAGE,new RouteComponentCompletionItemProvider() ,':');
 
 }
 

@@ -1,3 +1,4 @@
-import * as vscode from "vscode";
+import { Logger } from "../util/logger";
+
 export const SUPPORT_LANGUAGE = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact'];
-export const output = vscode.window.createOutputChannel("TestExtendsion");
+export const logger = new Logger();

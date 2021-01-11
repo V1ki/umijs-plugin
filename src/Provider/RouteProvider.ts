@@ -2,13 +2,13 @@ import * as vscode from "vscode";
 import { join } from "path";
 import { TextDocumentUtils } from "../util/document";
 import { QuoteType,QuoteCharMap } from "../util/types";
-import { output } from '../constant';
+import { logger } from '../constant';
 import { existsSync } from "fs";
 
 export default class RouteProvider implements vscode.DefinitionProvider {
     provideDefinition(document: vscode.TextDocument, position: vscode.Position) {
       //Write to output.
-      output.appendLine("Route Provider.");
+      logger.info("Route Provider.");
       const documentUtil = new TextDocumentUtils(document);
       let range = documentUtil.getQuoteRange(position, QuoteType.single);
       let split = QuoteCharMap[QuoteType.single];
@@ -25,8 +25,7 @@ export default class RouteProvider implements vscode.DefinitionProvider {
       }
   
       const line = document.lineAt(range.start.line).text;
-      output.append("line:");
-      output.appendLine(line);
+      logger.info(`line:${line}`);
       if (!line.includes("component:")) {
         return;
       }
@@ -35,11 +34,9 @@ export default class RouteProvider implements vscode.DefinitionProvider {
         line.lastIndexOf(split) - line.indexOf(split) - 1
       );
       
-      output.append("file:");
-      output.appendLine(file);
+      logger.info(`file:${file}`);
       const cwd = vscode.workspace.workspaceFolders![0].uri.fsPath;
-      output.append("cwd:");
-      output.appendLine(cwd);
+      logger.info(`cwd:${cwd}`);
   
       let definitionFile = join(`${cwd}/src/pages/`, file);
       if (file.match(/\/$/)) {
@@ -59,8 +56,7 @@ export default class RouteProvider implements vscode.DefinitionProvider {
           definitionFile = `${definitionFile}/index.jsx`;
         }
       }
-      output.append("definitionFile:");
-      output.appendLine(definitionFile);
+      logger.info(`definitionFile:${definitionFile}`);
   
       if (existsSync(definitionFile)) {
         return new vscode.Location(
