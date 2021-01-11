@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { join } from "path";
 import { TextDocumentUtils } from "../util/document";
 import { QuoteType,QuoteCharMap } from "../util/types";
 import { output } from '../constant';
