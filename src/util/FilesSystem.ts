@@ -19,7 +19,10 @@ export default class FileSystem {
       fileType: vscode.FileType
     ) => void = async (path, name, type) => {
       if (type === vscode.FileType.Directory) {
-
+        // components 文件夹默认忽略
+        if(["components"].indexOf(name) !== -1) {
+          return  ;
+        }
         this.readDir(join(path, name), readerMapper);
       } else if (type === vscode.FileType.File && name.match(/.(j|t)sx$/)) {
         const filename = join(path, name);

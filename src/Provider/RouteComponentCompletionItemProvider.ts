@@ -32,7 +32,6 @@ export default class RouteComponentCompletionItemProvider
     const fileSystem=  new FileSystem()
     const pages = fileSystem.loadPages();
 
-
     pages.forEach(p => {
       const item = new vscode.CompletionItem(` '${p}'`)
       item.documentation = new vscode.MarkdownString( `\`\`\`typescript\n${p}\`\`\``)

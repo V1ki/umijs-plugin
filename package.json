@@ -1,8 +1,8 @@
 {
   "name": "umijs-plugin",
   "displayName": "@v1ki/umijs-plugin",
-  "description": "umi 插件,从官方的Fork 过来,改进错误并增加自己的功能.",
-  "version": "0.0.1",
+  "description": "umijs的插件,做自己满意的作品.",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.0.0"
   },
