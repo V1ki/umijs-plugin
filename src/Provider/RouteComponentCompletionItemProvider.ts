@@ -31,6 +31,7 @@ export default class RouteComponentCompletionItemProvider
     logger.info(`cwd: ${cwd}`);
     const fileSystem=  new FileSystem()
     const pages = fileSystem.loadPages();
+    fileSystem.loadModels();
 
     pages.forEach(p => {
       const item = new vscode.CompletionItem(` '${p}'`)

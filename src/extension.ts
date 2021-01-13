@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
   const dvaJumper = vscode.languages.registerDefinitionProvider(SUPPORT_LANGUAGE, new DvaModelProvider());
   context.subscriptions.push(dvaJumper);
 
-  vscode.languages.registerCompletionItemProvider(SUPPORT_LANGUAGE,new RouteComponentCompletionItemProvider() ,':');
+  vscode.languages.registerCompletionItemProvider(SUPPORT_LANGUAGE,new RouteComponentCompletionItemProvider() ,':', ' ', '/');
 
 }
 
