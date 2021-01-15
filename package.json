@@ -43,6 +43,7 @@
     "@babel/parser": "^7.12.11",
     "@babel/types": "^7.12.12",
     "glob": "^7.1.6",
-    "superagent": "^6.1.0"
+    "superagent": "^6.1.0",
+    "typedi": "^0.9.1"
   }
 }

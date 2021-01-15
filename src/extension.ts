@@ -5,6 +5,9 @@ import { SUPPORT_LANGUAGE } from './constant';
 import { get } from 'superagent';
 import { ModelProvider } from './definitionProvider';
 import {RouteProvider, DvaModelProvider, RouteComponentCompletionItemProvider} from './Provider'
+import Container from 'typedi';
+import FileSystem from './util/FilesSystem';
+import { file } from '@babel/types';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -15,6 +18,25 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compJumper);
   const dvaJumper = vscode.languages.registerDefinitionProvider(SUPPORT_LANGUAGE, new DvaModelProvider());
   context.subscriptions.push(dvaJumper);
+  let fileSystem = Container.get(FileSystem);
+  fileSystem.loadModels();
+  fileSystem.loadPages();
+
+  vscode.workspace.onDidCreateFiles( (e) => {
+    console.log(" ===onDidCreateFiles ",e);
+  } )
+  vscode.workspace.onDidDeleteFiles( (e) => {
+    console.log(" ===onDidDeleteFiles ",e);
+  } )
+  vscode.workspace.onDidSaveTextDocument( (e) => {
+    console.log(" ===onDidSaveTextDocument ",e);
+  })
+  vscode.workspace.onDidRenameFiles( (e) => {
+    console.log(" ===onDidRenameFiles ",e);
+  } )
+  vscode.workspace.onDidChangeWorkspaceFolders( (e)=>{
+    console.log(" ===onDidChangeWorkspaceFolders ",e);
+  } )
 
   vscode.languages.registerCompletionItemProvider(SUPPORT_LANGUAGE,new RouteComponentCompletionItemProvider() ,':', ' ', '/');
 

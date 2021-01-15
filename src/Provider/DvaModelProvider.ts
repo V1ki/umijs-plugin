@@ -5,10 +5,25 @@ import { TextDocumentUtils } from "../util/document";
 import { QuoteType, QuoteCharMap } from "../util/types";
 import { sync } from "glob";
 import { logger } from "../constant";
+import Container from "typedi";
+import FileSystem from "../util/FilesSystem";
 
 export default class DvaModelProvider implements vscode.DefinitionProvider {
   provideDefinition(document: vscode.TextDocument, position: vscode.Position) {
-    logger.info("Dva Model Provider");
+    logger.info("Dva Model Provider ");
+    console.log(document,position);
+    //怎么获取当前调用的是哪个方法
+    
+    vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider',document.uri).then((result) => {
+
+      if(Array.isArray(result)){
+        result.forEach(r => {
+          const range = r.location.range ;
+            console.log(`${r.name} -- (${range.start.line},${range.start.character})  ---(${range.end.line},${range.end.character})` );
+        })
+      }
+    });
+
     const documentUtil = new TextDocumentUtils(document);
     let range = documentUtil.getQuoteRange(position, QuoteType.single);
     let split = QuoteCharMap[QuoteType.single];
@@ -43,61 +58,18 @@ export default class DvaModelProvider implements vscode.DefinitionProvider {
     if (!namespace) {
       return;
     }
+    // 直接从 之前读取到model 里取.
+    let fileSystem = Container.get(FileSystem);
+    let filterModels = fileSystem.models.filter( m => m.namespace === namespace);
 
-    const cwd = vscode.workspace.workspaceFolders![0].uri.fsPath;
-
-    let umiDvaPath: string = "";
-    try {
-      umiDvaPath = sync(`!(node_modules)/**/.umi/plugin-dva/dva.ts`, {
-        cwd,
-      })[0];
-    } catch (e) {
-      umiDvaPath = "";
+    if(filterModels.length === 0) {
+      return ;
     }
-    if (!umiDvaPath) {
-      return;
-    }
-    // get absolute path;
-    umiDvaPath = join(cwd, umiDvaPath);
-
-    const umiDvaFile = readFileSync(umiDvaPath).toString();
-
-    const namespaceStart = umiDvaFile.indexOf(`namespace: '${namespace}'`);
-    const namespaceEnd = umiDvaFile.indexOf("}", namespaceStart);
-
-    const appModelStr = umiDvaFile.slice(namespaceStart, namespaceEnd);
-    const [_, importName] = appModelStr.split("...");
-    if (!importName) {
-      return;
-    }
-
-    const keyStr = `import ${importName.trim()} from`;
-    const importPathStart = umiDvaFile.indexOf(keyStr) + keyStr.length;
-    const importPathEnd = umiDvaFile.indexOf(`import`, importPathStart);
-    const uriRaw = umiDvaFile.slice(importPathStart, importPathEnd + 1).trim();
-    const end =
-      uriRaw.lastIndexOf('"') === -1
-        ? uriRaw.lastIndexOf("'")
-        : uriRaw.lastIndexOf('"');
-    const uri = uriRaw.slice(1, end);
-
-    let definitionFile = "";
-    if (existsSync(`${uri}`)) {
-      definitionFile = `${uri}`;
-    } else if (existsSync(`${uri}.ts`)) {
-      definitionFile = `${uri}.ts`;
-    } else if (existsSync(`${uri}.tsx`)) {
-      definitionFile = `${uri}.tsx`;
-    } else if (existsSync(`${uri}.js`)) {
-      definitionFile = `${uri}.js`;
-    } else if (existsSync(`${uri}.jsx`)) {
-      definitionFile = `${uri}.jsx`;
-    }
-
+    let fsPath = filterModels[0].fsPath ; 
     // already find file .
     // start find method
 
-    const dvaModelFile = readFileSync(definitionFile).toString();
+    const dvaModelFile = readFileSync(fsPath).toString();
     const lines = dvaModelFile.split("\n");
     const methodKeyStr = `*${method}(`;
     let lineIndex = 0;
@@ -109,9 +81,9 @@ export default class DvaModelProvider implements vscode.DefinitionProvider {
     });
     const methodStart = dvaModelFile.indexOf(methodKeyStr);
 
-    if (existsSync(definitionFile)) {
+    if (existsSync(fsPath)) {
       return new vscode.Location(
-        vscode.Uri.file(definitionFile),
+        vscode.Uri.file(fsPath),
         new vscode.Position(lineIndex, 0)
       );
     }

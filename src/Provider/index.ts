@@ -1,9 +1,9 @@
 import DvaModelProvider from './DvaModelProvider';
 import RouteProvider from './RouteProvider';
-import RouteComponentCompletionItemProvider from './RouteComponentCompletionItemProvider' ;
+import ComponentProvider from './CompletionItem/ComponentProvider' ;
 
 export { 
     DvaModelProvider,
     RouteProvider,
-    RouteComponentCompletionItemProvider
+    ComponentProvider as RouteComponentCompletionItemProvider
 }

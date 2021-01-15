@@ -1,10 +1,11 @@
 import { join } from "path";
 import { config } from "process";
+import Container from "typedi";
 import * as vscode from "vscode";
-import { logger } from "../constant";
-import FileSystem from "../util/FilesSystem";
+import { logger } from "../../constant";
+import FileSystem from "../../util/FilesSystem";
 
-export default class RouteComponentCompletionItemProvider
+export default class ComponentProvider
   implements vscode.CompletionItemProvider {
   provideCompletionItems(
     document: vscode.TextDocument,
@@ -20,6 +21,7 @@ export default class RouteComponentCompletionItemProvider
       new vscode.Range(position.with(position.line, 0), position)
     );
     logger.info(`current line ${lineText}`);
+    console.log("context",context);
     //todo 更智能的判断
     if (!lineText.includes("component")) {
       return [];
@@ -29,11 +31,8 @@ export default class RouteComponentCompletionItemProvider
     const cwd = vscode.workspace.workspaceFolders![0].uri.fsPath;
     
     logger.info(`cwd: ${cwd}`);
-    const fileSystem=  new FileSystem()
-    const pages = fileSystem.loadPages();
-    fileSystem.loadModels();
-
-    pages.forEach(p => {
+    let fileSystem = Container.get(FileSystem);
+    fileSystem.pages.forEach(p => {
       const item = new vscode.CompletionItem(` '${p}'`)
       item.documentation = new vscode.MarkdownString( `\`\`\`typescript\n${p}\`\`\``)
       completionItems.push(item)
