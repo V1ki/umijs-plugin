@@ -1,4 +1,4 @@
-import { readdirSync, Dirent, readFileSync } from "fs";
+import { readdirSync, Dirent, readFileSync, readdir } from "fs";
 import { join } from "path";
 import * as vscode from "vscode";
 import { logger } from "../constant";
@@ -19,6 +19,7 @@ import {
   is,
   isBlockStatement,
 } from "@babel/types";
+import { config } from "process";
 
 declare type DvaModel = {
   namespace: string;
@@ -53,8 +54,8 @@ export default class FileSystem {
   // 读取 src/pages 里中的内容,默认忽略 components 文件夹
   loadPages() {
     // list pages
+    this.pages = [] ;
     const cwd = vscode.workspace.workspaceFolders![0].uri.fsPath;
-    let components: string[] = [];
     const rootPage = join(cwd, "src", "pages");
 
     const readerMapper: (
@@ -72,16 +73,16 @@ export default class FileSystem {
         const filename = join(path, name);
         const component = filename
           .replace(rootPage, ".")
-          .replace(/(index)?.(j|t)sx$/, "");
+          .replace(/(index)?.(j|t)sx$/, "")
+          .replace(/\\/gi, "/"); // 对于windows 下的文件分隔符,需要转换成 /
         // logger.info(`filename:${filename} -- ${component}`);
-        components.push(component);
+        this.pages.push(component);
       }
     };
     this.readDir(rootPage, readerMapper);
+    // windows .\  mac : /
+    //
 
-    logger.info(`components:${components} `);
-
-    this.pages = components;
   }
 
   //   获取整体配置
@@ -147,13 +148,15 @@ export default class FileSystem {
     // return null ;
   }
 
+
+
   loadModels() {
     // load global
     // find src models
 
     const cwd = vscode.workspace.workspaceFolders![0].uri.fsPath;
     const modelRoot = join(cwd, "src", "models");
-    const models: DvaModel[] = [];
+    this.models = [] ;
 
     const globalMapper: (
       path: string,
@@ -180,7 +183,7 @@ export default class FileSystem {
           const parserOptions = config.parserOptions;
           const dvaModel = this.compile(fsPath, code, parserOptions);
           if (dvaModel) {
-            models.push(dvaModel);
+            this.models.push(dvaModel);
           }
         }
       }
@@ -213,16 +216,19 @@ export default class FileSystem {
           const parserOptions = config.parserOptions;
           const dvaModel = this.compile(fsPath, code, parserOptions);
           if (dvaModel) {
-            models.push(dvaModel);
+            this.models.push(dvaModel);
           }
         }
       }
     };
 
     this.readDir(pagesRoot, localMapper);
-    console.log(models);
-    this.models = models;
   }
+
+  refreshFile(fsPath: string, isDelete: boolean) {
+      
+  }
+
 
   /**
    * 编译指定的code ,然后 生成对应的dvamodel 数据
@@ -255,7 +261,7 @@ export default class FileSystem {
             /**
              * effects相关的mapper
              * @param key 一般为方法名称.
-             * @param val 
+             * @param val
              */
             const effectsMapper: (key: string, value: Node) => void = (
               key,
@@ -347,13 +353,17 @@ export default class FileSystem {
     path: string,
     map: (path: string, filename: string, fileType: vscode.FileType) => void
   ) {
-    const files: Dirent[] = readdirSync(path, { withFileTypes: true });
-    files.forEach((dir) => {
-      map(
-        path,
-        dir.name,
-        dir.isDirectory() ? vscode.FileType.Directory : vscode.FileType.File
-      );
+    readdir(path, { withFileTypes: true }, (err, files) => {
+      if(err){
+        console.log(err);
+      }
+      files.forEach((dir) => {
+        map(
+          path,
+          dir.name,
+          dir.isDirectory() ? vscode.FileType.Directory : vscode.FileType.File
+        );
+      });
     });
   }
 }

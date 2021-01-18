@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { SUPPORT_LANGUAGE } from './constant';
 import { get } from 'superagent';
 import { ModelProvider } from './definitionProvider';
-import {RouteProvider, DvaModelProvider, RouteComponentCompletionItemProvider} from './Provider'
+import {RouteProvider, DvaModelProvider, RouteComponentCompletionItemProvider, DvaCompletionItemProvider} from './Provider'
 import Container from 'typedi';
 import FileSystem from './util/FilesSystem';
 import { file } from '@babel/types';
@@ -24,21 +24,36 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidCreateFiles( (e) => {
     console.log(" ===onDidCreateFiles ",e);
+    e.files.forEach(uri=>{
+      
+    });
   } )
   vscode.workspace.onDidDeleteFiles( (e) => {
     console.log(" ===onDidDeleteFiles ",e);
+    e.files.forEach(uri => {
+
+    })
   } )
-  vscode.workspace.onDidSaveTextDocument( (e) => {
-    console.log(" ===onDidSaveTextDocument ",e);
+  vscode.workspace.onDidSaveTextDocument( (doc) => {
+    console.log(" ===onDidSaveTextDocument ",doc);
+    let uri = doc.uri;
+
+    
   })
   vscode.workspace.onDidRenameFiles( (e) => {
     console.log(" ===onDidRenameFiles ",e);
+e.files.forEach(uri => {
+
+});
+
   } )
   vscode.workspace.onDidChangeWorkspaceFolders( (e)=>{
     console.log(" ===onDidChangeWorkspaceFolders ",e);
+    
   } )
 
   vscode.languages.registerCompletionItemProvider(SUPPORT_LANGUAGE,new RouteComponentCompletionItemProvider() ,':', ' ', '/');
+  vscode.languages.registerCompletionItemProvider(SUPPORT_LANGUAGE,new DvaCompletionItemProvider() ,':', ' ', '/');
 
 }
 
